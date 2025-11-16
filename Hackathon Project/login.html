@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Sign in — Study Buddy</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-1: #ffeef8;
+      --bg-2: #fff7fc;
+      --accent: #ff4f8b;
+      --accent-2: #ff8f4f;
+      --muted: #6b7280;
+    }
+
+    body {
+      font-family: Inter, sans-serif;
+      margin: 0;
+      padding: 26px;
+      background: linear-gradient(180deg, var(--bg-1), var(--bg-2));
+      color: #0f172a;
+    }
+
+    .card {
+      max-width: 520px;
+      margin: 64px auto;
+      padding: 26px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.06);
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+      margin-top: 6px;
+      font-size: 15px;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: 600;
+    }
+
+    button[type="submit"] {
+      width: 100%;
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 8px;
+      border: 0;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .tertiary {
+      width: 100%;
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 8px;
+      border: 2px solid var(--accent);
+      background: #fff;
+      color: var(--accent);
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .muted { color: var(--muted); margin-bottom: 10px; }
+    .small { font-size: 14px; margin-top: 12px; text-align: center; }
+    .inline-link { color: var(--accent); text-decoration: none; font-weight: 600; }
+
+    .skip-btn {
+      background: none;
+      border: none;
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      margin-bottom: 12px;
+      padding: 0;
+      float: right;
+    }
+
+    @media (max-width: 520px) {
+      .card {
+        margin: 28px 16px;
+        padding: 18px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="card">
+
+    <!-- SKIP button (fixed with type="button") -->
+    <button id="skipLogin" type="button" class="skip-btn">Skip</button>
+
+    <h1>Sign In</h1>
+    <p class="muted">Welcome back — sign in to your account.</p>
+
+    <form id="loginForm" novalidate>
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" placeholder="you@example.com" required />
+
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" placeholder="Your password" required />
+
+      <button type="submit">Sign in</button>
+
+      <div style="text-align: center; margin-top: 12px;">
+        <a class="inline-link" href="signup.html">Create account</a>
+      </div>
+
+      <p class="small">
+        <a href="#" id="forgot" class="inline-link">Forgot password?</a>
+      </p>
+    </form>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+    const SUPABASE_URL = 'https://fdhgxjafedeahxrmtkph.supabase.co';
+    const SUPABASE_ANON_KEY =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkaGd4amFmZWRlYWh4cm10a3BoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxOTAyMDksImV4cCI6MjA3ODc2NjIwOX0.SfzH10Pb5kej2CRz0T9_mzRcUDddm86sUeA7AU_vU6Y';
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const form = document.getElementById('loginForm');
+
+    form.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      const email = form.email.value.trim();
+      const password = form.password.value;
+
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+        if (error) throw error;
+
+        location.href = 'dashboard.html';
+      } catch (err) {
+        alert(err.message || 'Login failed');
+      }
+    });
+
+    document.getElementById('forgot').addEventListener('click', async (e) => {
+      e.preventDefault();
+      const email = prompt('Enter the email you signed up with:');
+      if (!email) return;
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      alert(error ? error.message : 'Reset email sent.');
+    });
+
+    /* ⭐ WORKING SKIP BUTTON ⭐ */
+    document.getElementById('skipLogin').addEventListener('click', () => {
+      location.href = 'dashboard.html';
+    });
+  </script>
+</body>
+</html>

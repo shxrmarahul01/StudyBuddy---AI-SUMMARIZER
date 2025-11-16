@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PDF + YouTube Summarizer + Quiz — Ready</title>
+
+  <!-- PDF.js (CDN) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+
+  <style>
+    :root{
+      --bg:#0f1724; --card:#0b1220; --muted:#94a3b8;
+      --accent:#7c3aed; --accent-2:#4f3aed; --glass:rgba(255,255,255,0.04);
+      --radius:12px; color-scheme: dark; font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto;
+    }
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#071027);color:#e6eef8}
+    .wrap{max-width:1100px;margin:28px auto;padding:22px}
+    header{display:flex;gap:18px;align-items:center;margin-bottom:18px}
+    .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,#4f46e5,#06b6d4);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px}
+    .grid{display:grid;grid-template-columns:380px 1fr;gap:18px}
+    @media (max-width:980px){ .grid{grid-template-columns:1fr} }
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), var(--card));padding:16px;border-radius:var(--radius);margin-bottom:20px}
+    .file-drop{border:1px dashed rgba(255,255,255,0.06);padding:14px;border-radius:10px;background:var(--glass);display:flex;flex-direction:column;gap:8px;align-items:center;cursor:pointer}
+    .btn{background: linear-gradient(90deg, var(--accent), var(--accent-2));padding:10px 14px;border:none;border-radius:10px;color:white;font-weight:600;cursor:pointer;transition:0.18s}
+    .btn.ghost{background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.26)}
+    textarea{width:100%;min-height:140px;padding:12px;border-radius:10px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:inherit}
+    .quiz-card{padding:10px;background:rgba(255,255,255,0.04);border-radius:10px;margin-top:12px}
+    .question{padding:10px;background:rgba(0,0,0,0.18);border-radius:8px;margin-bottom:8px}
+    .option-label{display:flex;gap:10px;align-items:center;padding:8px;border-radius:8px;cursor:pointer}
+    .meta{color:var(--muted);font-size:13px}
+    .small{font-size:12px;color:var(--muted)}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">SB</div>
+      <div>
+        <h1>PDF & YouTube Summarizer</h1>
+        <p class="small">Upload a PDF or paste a YouTube link to create summaries and quizzes — all local.</p>
+      </div>
+    </header>
+
+    <main class="grid">
+      <!-- LEFT: uploader + YouTube -->
+      <section class="card">
+        <h2>Upload PDF</h2>
+        <div id="drop" class="file-drop" tabindex="0">
+          <div>Click or drop a PDF here</div>
+          <div id="fileName" class="small">No file selected</div>
+        </div>
+        <input id="pdfUpload" type="file" accept="application/pdf" style="display:none">
+
+        <div style="margin-top:12px">
+          <label class="small">Summary length
+            <select id="summaryLen" style="margin-left:8px">
+              <option value="3">Short</option>
+              <option value="5" selected>Medium</option>
+              <option value="8">Long</option>
+            </select>
+          </label>
+        </div>
+
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button id="extractBtn" class="btn">Extract & Summarize</button>
+          <button id="downloadBtn" class="btn ghost">Download .txt</button>
+        </div>
+
+        <hr style="margin:14px 0">
+
+        <h2>YouTube Video Summarizer</h2>
+        <input id="ytLink" placeholder="Paste YouTube link (or leave empty to paste transcript below)" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit" />
+
+        <div style="margin-top:8px;display:flex;gap:8px">
+          <button id="ytSummBtn" class="btn">Fetch & Summarize</button>
+          <button id="ytManualBtn" class="btn ghost">Use Pasted Transcript</button>
+        </div>
+
+        <div style="margin-top:10px">
+          <div class="small">Or paste transcript manually:</div>
+          <textarea id="ytTranscript" placeholder="Paste YouTube transcript here (optional)"></textarea>
+        </div>
+
+        <div style="margin-top:12px">
+          <button id="demoBtn" class="btn ghost">Load Demo & Summarize</button>
+        </div>
+
+      </section>
+
+      <!-- RIGHT: summary & quiz -->
+      <section class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <h2 style="margin:0">Summary</h2>
+            <div class="meta">PDF & YouTube summaries appear here</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button id="copyBtn" class="btn ghost">Copy Summary</button>
+          </div>
+        </div>
+
+        <textarea id="summaryOutput" placeholder="Summary will appear here..." style="margin-top:12px"></textarea>
+
+ 
+        </div>
+
+        <!-- QUIZ AREA -->
+        <div id="quizArea" class="quiz-card" style="display:none"></div>
+        <div id="resultArea" class="quiz-card" style="display:none"></div>
+
+      </section>
+    </main>
+
+    <!-- RAW TEXT -->
+    <section class="card" style="margin-top:18px">
+      <h2>Raw Extracted Text (debug)</h2>
+      <div id="rawText" style="max-height:300px;overflow:auto;font-size:13px">No document</div>
+    </section>
+  </div>
+
+<script>
+/* ----------------------------
+   PDF.js Worker
+-----------------------------*/
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
+/* ----------------------------
+   State & DOM refs
+-----------------------------*/
+let currentFile = null;
+let lastExtractedText = "";
+let latestQuiz = [];
+
+const drop = document.getElementById('drop');
+const fileInput = document.getElementById('pdfUpload');
+const extractBtn = document.getElementById('extractBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+const summaryOutput = document.getElementById('summaryOutput');
+const rawTextEl = document.getElementById('rawText');
+const fileNameEl = document.getElementById('fileName');
+const copyBtn = document.getElementById('copyBtn');
+
+const ytLink = document.getElementById('ytLink');
+const ytSummBtn = document.getElementById('ytSummBtn');
+const ytManualBtn = document.getElementById('ytManualBtn');
+const ytTranscript = document.getElementById('ytTranscript');
+const demoBtn = document.getElementById('demoBtn');
+
+/* Drag & drop */
+drop.addEventListener('click', () => fileInput.click());
+drop.addEventListener('dragover', e => { e.preventDefault(); drop.style.borderColor = 'rgba(124,58,237,0.6)'; });
+drop.addEventListener('dragleave', e => { e.preventDefault(); drop.style.borderColor = ''; });
+drop.addEventListener('drop', e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleFile(f); });
+
+fileInput.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); });
+
+function handleFile(file){
+  if (!file) return;
+  if (file.type !== 'application/pdf') { alert('Please upload a PDF'); return; }
+  currentFile = file;
+  fileNameEl.textContent = `${file.name} • ${Math.round(file.size/1024)} KB`;
+  rawTextEl.textContent = 'Ready to extract — click Extract.';
+  summaryOutput.value = '';
+  lastExtractedText = '';
+  latestQuiz = [];
+  document.getElementById('quizArea').style.display = 'none';
+  document.getElementById('resultArea').style.display = 'none';
+  document.getElementById('submitQuizBtn').disabled = true;
+  document.getElementById('resetQuizBtn').disabled = true;
+  document.getElementById('copyAnswersBtn').disabled = true;
+}
+
+/* ----------------------------
+   PDF Extraction
+-----------------------------*/
+extractBtn.addEventListener('click', async () => {
+  if (!currentFile) return alert('Please upload a PDF first.');
+
+  extractBtn.disabled = true;
+  extractBtn.textContent = 'Extracting...';
+
+  try {
+    const typed = new Uint8Array(await currentFile.arrayBuffer());
+    const pdf = await pdfjsLib.getDocument(typed).promise;
+
+    let extracted = '';
+    rawTextEl.textContent = `Extracting pages...`;
+
+    for (let i=1; i<= pdf.numPages; i++){
+      const page = await pdf.getPage(i);
+      const textContent = await page.getTextContent();
+      extracted += textContent.items.map(item => (item.str || '')).join(' ') + '\n\n';
+      rawTextEl.textContent = `Extracting page ${i} / ${pdf.numPages}...`;
+      // keep UI responsive
+      await new Promise(r => setTimeout(r, 30));
+    }
+
+    lastExtractedText = extracted.trim();
+    rawTextEl.textContent = lastExtractedText.slice(0, 200000) || 'No text extracted.';
+    const summaryLen = parseInt(document.getElementById('summaryLen').value || '5', 10);
+    summaryOutput.value = hybridSummary(lastExtractedText, Math.max(4, summaryLen * 3));
+
+  } catch (err) {
+    console.error(err);
+    alert('Extraction failed — PDF may be scanned or protected. (This tool does not perform OCR.)');
+  }
+
+  extractBtn.disabled = false;
+  extractBtn.textContent = 'Extract & Summarize';
+});
+
+/* ----------------------------
+   Improved extractive summarizer
+   - TF-IDF style scoring, stopword removal
+   - returns top sentences in original order for coherence
+-----------------------------*/
+function hybridSummary(text, maxPoints = 8) {
+  if (!text || !text.trim()) return 'No readable text found.';
+  // normalize whitespace
+  text = text.replace(/\r\n|\r/g, '\n').replace(/\s+/g, ' ').trim();
+
+  // split into sentences (basic)
+  let sentences = text.split(/(?<=[.!?])\s+/).map(s => s.trim()).filter(s => s.length > 20);
+
+  if (sentences.length === 0) return 'No meaningful sentences found.';
+
+  // basic stopword set
+  const stopwords = new Set([
+    'the','and','that','have','for','not','with','you','this','but','from','they','say','her','she',
+    'will','one','all','would','there','their','what','so','about','which','when','make','can','like',
+    'time','just','him','know','take','people','into','year','your','good','some','could','them','see',
+    'other','than','then','now','look','only','come','its','over','think','also','back','after','use',
+    'two','how','our','work','first','well','way','even','new','want','because','any','these','give',
+    'day','most','us','are','is','in','of','a','to','it','as','on','at','by','be','or'
+  ]);
+
+  const tokenize = s => (s.toLowerCase().match(/\b[a-z]{3,}\b/g) || []).filter(w => !stopwords.has(w));
+
+  const sentenceWords = sentences.map(tokenize);
+
+  // build DF and TF per sentence
+  const df = {};
+  const tfPerSentence = sentenceWords.map(arr => {
+    const tf = {};
+    arr.forEach(w => tf[w] = (tf[w] || 0) + 1);
+    const seen = new Set();
+    arr.forEach(w => { if (!seen.has(w)) { df[w] = (df[w] || 0) + 1; seen.add(w); }});
+    return tf;
+  });
+
+  // compute IDF
+  const N = sentences.length;
+  const idf = {};
+  Object.keys(df).forEach(w => idf[w] = Math.log(1 + N / df[w]));
+
+  // score sentences
+  const scores = tfPerSentence.map((tf, i) => {
+    let s = 0;
+    for (const w in tf) s += tf[w] * (idf[w] || 0);
+    // length bonus for moderate informative length
+    const len = sentenceWords[i].length;
+    s *= (1 + Math.min(len / 20, 1));
+    return s;
+  });
+
+  // choose top K sentences (adapt to doc size, but no more than maxPoints)
+  const k = Math.max(1, Math.min(maxPoints, Math.floor(Math.sqrt(N) * 2) || maxPoints));
+  const idxs = scores
+    .map((sc, i) => ({ i, sc }))
+    .sort((a,b) => b.sc - a.sc)
+    .slice(0, k)
+    .map(o => o.i);
+
+  // restore original order
+  idxs.sort((a,b) => a - b);
+
+  const bullets = idxs.map(i => '• ' + sentences[i]);
+  return bullets.join('\n\n');
+}
+
+/* ----------------------------
+   Copy / Download Summary
+-----------------------------*/
+copyBtn.addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(summaryOutput.value || '');
+    copyBtn.textContent = 'Copied!';
+    setTimeout(()=> copyBtn.textContent = 'Copy Summary', 1200);
+  } catch (e) {
+    alert('Copy failed — browser denial. You can select the text and copy manually.');
+  }
+});
+
+downloadBtn.addEventListener('click', () => {
+  const text = summaryOutput.value || lastExtractedText;
+  if (!text) return alert('No summary available.');
+  const blob = new Blob([text], {type:'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'summary.txt'; a.click();
+  URL.revokeObjectURL(url);
+});
+
+/* ----------------------------
+   YouTube transcript + summarizer
+   - best-effort fetch; CORS may block many endpoints
+   - fallback: paste transcript and click Use Pasted Transcript
+-----------------------------*/
+function extractVideoID(url) {
+  try {
+    const u = new URL(url);
+    if (u.searchParams.get('v')) return u.searchParams.get('v');
+    if (u.hostname.includes('youtu.be')) return u.pathname.slice(1);
+    if (u.pathname.includes('shorts')) return u.pathname.split('/')[2];
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+async function getYouTubeTranscript(videoId) {
+  const endpoints = [
+    `https://youtubetranscript.com/?server_vid=${videoId}`,
+    `https://r.jina.ai/http://youtube.com/watch?v=${videoId}`
+  ];
+  for (const endpoint of endpoints) {
+    try {
+      const res = await fetch(endpoint);
+      if (!res.ok) continue;
+      const text = await res.text();
+      try {
+        const json = JSON.parse(text);
+        if (Array.isArray(json)) return json.map(x => x.text || x).join(' ');
+        if (json.transcript) return json.transcript;
+      } catch(e){ }
+      const stripped = text.replace(/<script[^>]*>[\s\S]*?<\/script>/gi,'').replace(/<[^>]+>/g,' ');
+      const lines = stripped.split('\n').map(l=>l.trim()).filter(Boolean);
+      if (lines.length > 0) return lines.join(' ');
+    } catch (err) {
+      console.warn('transcript attempt failed for', endpoint, err);
+    }
+  }
+  throw new Error('Transcript fetch failed (CORS or unavailable). Please paste transcript manually.');
+}
+
+ytSummBtn.addEventListener('click', async () => {
+  const link = ytLink.value.trim();
+  if (!link) return alert('Paste a YouTube link (or paste transcript below and click "Use Pasted Transcript").');
+  const videoId = extractVideoID(link);
+  if (!videoId) return alert('Could not parse YouTube link.');
+
+  ytSummBtn.disabled = true;
+  ytSummBtn.textContent = 'Fetching transcript...';
+
+  try {
+    const transcript = await getYouTubeTranscript(videoId);
+    if (!transcript || transcript.length < 30) throw new Error('No transcript text');
+    summaryOutput.value = hybridSummary(transcript, 10);
+    ytTranscript.value = transcript;
+  } catch (err) {
+    console.error(err);
+    alert('Failed to fetch transcript automatically. Please paste transcript into the box and click "Use Pasted Transcript".');
+  } finally {
+    ytSummBtn.disabled = false;
+    ytSummBtn.textContent = 'Fetch & Summarize';
+  }
+});
+
+ytManualBtn.addEventListener('click', () => {
+  const t = ytTranscript.value.trim();
+  if (!t) return alert('Paste the transcript first into the box above.');
+  summaryOutput.value = hybridSummary(t, 10);
+});
+
+/* ----------------------------
+   Demo button (loads sample text and summarizes it)
+-----------------------------*/
+demoBtn.addEventListener('click', () => {
+  const demoText = `Artificial intelligence (AI) is transforming industries by automating tasks, analyzing large datasets, and enabling new forms of creativity. Businesses deploy AI for predictive maintenance, customer support chatbots, and personalized recommendations to increase efficiency and improve customer experiences. However, AI also raises ethical concerns including biases in training data, job displacement for certain roles, and privacy issues related to data collection. Governments and organizations are working on guidelines and regulations to ensure responsible AI development, while researchers focus on interpretability and robustness. Looking forward, AI is expected to augment human capabilities and support better decision-making across fields like healthcare, finance, and education.`;
+  rawTextEl.textContent = demoText;
+  lastExtractedText = demoText;
+  summaryOutput.value = hybridSummary(demoText, 8);
+});
+
+/* ----------------------------
+   Placeholder quiz generator
+-----------------------------*/
+document.getElementById('generateQuizBtn').addEventListener('click', () => {
+  const s = summaryOutput.value.trim();
+  if (!s) return alert('Generate or paste a summary first.');
+  alert('Quiz generation is not implemented in this packaged demo. If you want, I can add automatic MCQ generation.');
+});
+</script>
+</body>
+</html>

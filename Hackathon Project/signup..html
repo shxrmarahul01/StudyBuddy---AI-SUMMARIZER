@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Create account — Study Buddy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ---------------------------
+       css
+       --------------------------- */
+    :root{
+      --bg-1:#0f172a;
+      --bg-2:#071029;
+      --card-bg: rgba(255,255,255,0.7);
+      --accent:#ff4f8b;
+      --accent-2:#ff8f4f;
+      --muted:#6b7280;
+      --glass-border: rgba(255,255,255,0.6);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background:
+        radial-gradient(800px 400px at 10% 10%, rgba(255,79,139,0.06), transparent 10%),
+        radial-gradient(700px 350px at 90% 90%, rgba(255,140,79,0.04), transparent 10%),
+        linear-gradient(180deg,var(--bg-1),var(--bg-2));
+      color:#0b1220;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:40px;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    /* ---------------------------
+       Card / layout
+       --------------------------- */
+    .card{
+      width:100%;
+      max-width:520px;
+      margin:32px;
+      padding:32px;
+      border-radius:14px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.72), rgba(245,246,250,0.72));
+      backdrop-filter: blur(8px) saturate(120%);
+      -webkit-backdrop-filter: blur(8px) saturate(120%);
+      border: 1px solid rgba(255,255,255,0.5);
+      box-shadow: 0 12px 40px rgba(2,6,23,0.28);
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .card:focus-within{ transform: translateY(-3px); box-shadow: 0 18px 50px rgba(2,6,23,0.32); }
+
+    h1{margin:0 0 6px 0;font-size:20px;letter-spacing:-0.2px}
+    .muted{color:var(--muted);margin-bottom:10px}
+
+    label{display:block;margin-top:12px;font-weight:600;color:rgba(11,18,32,0.8);font-size:13px}
+    input{
+      width:100%;
+      padding:14px 14px;
+      border-radius:10px;
+      border:1px solid rgba(15,23,42,0.06);
+      margin-top:6px;
+      font-size:15px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(250,250,251,0.9));
+      box-shadow: inset 0 -6px 18px rgba(11,18,32,0.02);
+      transition: box-shadow .16s ease, transform .12s ease, border-color .12s ease;
+      color:#081226;
+    }
+    input::placeholder{color:#9aa3b2;font-weight:500}
+    input:focus{
+      outline: none;
+      border-color: transparent;
+      box-shadow: 0 8px 24px rgba(2,6,23,0.06), 0 0 0 6px rgba(255,79,139,0.06);
+      transform: translateY(-1px);
+    }
+
+    .field-wrap{position:relative}
+
+    /* ---------------------------
+       Buttons
+       --------------------------- */
+    button[type="submit"]{
+      width:100%;
+      margin-top:18px;
+      padding:14px;
+      border-radius:12px;
+      border:0;
+      background: linear-gradient(90deg,var(--accent),var(--accent-2));
+      color:#fff;
+      font-size:16px;
+      font-weight:600;
+      cursor:pointer;
+      box-shadow: 0 8px 30px rgba(255,79,139,0.16);
+      transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+    }
+    button[type="submit"]:hover{ transform: translateY(-3px); box-shadow: 0 18px 40px rgba(255,79,139,0.18); }
+    button[type="submit"]:active{ transform: translateY(-1px) scale(.997); }
+
+    .tertiary{
+      width:100%;
+      margin-top:12px;
+      padding:12px;
+      border-radius:10px;
+      border:1px solid rgba(255,79,139,0.14);
+      background:transparent;
+      color:var(--accent);
+      font-size:15px;
+      cursor:pointer;
+      transition: background .12s ease, transform .12s ease;
+    }
+    .tertiary:hover{ background: rgba(255,79,139,0.04); transform: translateY(-2px); }
+
+    .small{font-size:13px;margin-top:14px;text-align:center;color:rgba(11,18,32,0.6)}
+    .inline-link{color:var(--accent);text-decoration:none;font-weight:700}
+    .inline-link:hover{text-decoration:underline}
+
+    .pw-toggle{position:absolute;right:8px;top:8px;cursor:pointer;background:none;border:0;color:var(--accent)}
+
+    /* repurpose muted declaration where used */
+    .muted{color:var(--muted)}
+
+    /* ---------------------------
+       Responsive tweaks
+       --------------------------- */
+    @media (max-width:520px){
+      .card{padding:20px;margin:18px;border-radius:12px}
+      body{padding:18px}
+      input{padding:12px}
+      button[type="submit"]{padding:12px}
+    }
+  </style>
+</head>
+
+<body>
+  <!--
+    Create account card
+    - Role/main aria to help screen readers find the primary form on the page
+  -->
+  <div class="card" role="main" aria-labelledby="h1">
+    <h1 id="h1">Create Your Account</h1>
+    <p class="muted">Join Study Buddy — it only takes a minute.</p>
+
+    <form id="signupForm" novalidate>
+      <label for="fullname">Full name</label>
+      <input id="fullname" name="fullname" type="text" placeholder="Your name" required minlength="2" />
+
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" placeholder="you@example.com" required />
+
+      <label for="password">Password</label>
+      <div class="field-wrap">
+        <input id="password" name="password" type="password" placeholder="At least 6 characters" required minlength="6" />
+      </div>
+
+      <label for="confirmPassword">Confirm password</label>
+      <div class="field-wrap">
+        <input id="confirmPassword" name="confirmPassword" type="password" placeholder="Re-enter password" required minlength="6" />
+      </div>
+
+      <button type="submit">Create account</button>
+      <button type="button" id="backToSignIn" class="tertiary">Already have an account? Sign in</button>
+
+      <p class="small">
+        By creating an account you agree to our
+        <a href="#" class="inline-link">Terms</a> and
+        <a href="#" class="inline-link">Privacy Policy</a>.
+      </p>
+    </form>
+  </div>
+
+  <!--
+    Supabase client (ESM)
+    NOTE: I preserved your keys and endpoints exactly as provided.
+    If you swap keys, update the constants below.
+  -->
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+    // <-- REPLACE THESE WITH YOUR VALUES (you already gave them) -->
+    const SUPABASE_URL = 'https://fdhgxjafedeahxrmtkph.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkaGd4amFmZWRlYWh4cm10a3BoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxOTAyMDksImV4cCI6MjA3ODc2NjIwOX0.SfzH10Pb5kej2CRz0T9_mzRcUDddm86sUeA7AU_vU6Y';
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // UI bindings
+    document.getElementById('backToSignIn').addEventListener('click', () => location.href = 'login.html');
+
+    const form = document.getElementById('signupForm');
+    form.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      const fullname = form.fullname.value.trim();
+      const email = form.email.value.trim();
+      const password = form.password.value;
+      const confirmPassword = form.confirmPassword.value;
+
+      if (password !== confirmPassword) {
+        alert('Passwords do not match!');
+        return;
+      }
+
+      try {
+        // create user and send confirm email (Supabase will by default send confirmation if enabled)
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password
+        }, {
+          data: { full_name: fullname } // store a user_metadata field
+        });
+
+        if (error) throw error;
+
+        // On success, supabase returns user or session object.
+        alert('Signup successful! Please check your email if confirmation is required. Redirecting to login...');
+        location.href = 'login.html';
+      } catch (err) {
+        console.error(err);
+        alert(err.message || 'Signup failed');
+      }
+    });
+  </script>
+</body>
+</html>

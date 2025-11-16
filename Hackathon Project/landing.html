@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Study Buddy — Save time. Learn smarter.</title>
+  <meta name="description" content="Study Buddy — Auto-summaries, auto-quizzes and smart organization to help students and teachers save time and study better.">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-1: #0f172a;
+      --bg-2: #071033;
+      --muted: #9aa6bf;
+      --text: #e6eef8;
+      --accent-a: #7c3aed;
+      --accent-b: #06b6d4;
+      --card: rgba(255,255,255,0.03);
+      --glass: rgba(255,255,255,0.04);
+      --radius: 12px;
+      --shadow: 0 12px 40px rgba(2,6,23,0.6);
+      --max-width: 1150px;
+    }
+
+    
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; background: linear-gradient(180deg, var(--bg-1), var(--bg-2)); color: var(--text); }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; }
+
+    /* Page container */
+    .container { max-width: var(--max-width); margin: 0 auto; padding: 28px; }
+
+    /* ---------- Header (sticky) ---------- */
+    .header-wrap {
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 0;
+      background: linear-gradient(180deg, rgba(2,6,23,0.6), rgba(2,6,23,0.35));
+      backdrop-filter: blur(6px);
+      border-bottom: 1px solid rgba(255,255,255,0.02);
+    }
+
+    .brand { display:flex; align-items:center; gap:14px; }
+    .logo {
+      width: 44px; height: 44px; border-radius: 10px;
+      background: linear-gradient(90deg, var(--accent-a), var(--accent-b));
+      display:flex; align-items:center; justify-content:center; font-weight:800; color: #021025;
+    }
+
+    /* Header right-side controls */
+    .header-controls { display:flex; align-items:center; gap:12px; }
+
+    nav.desktop-only { display:flex; gap:12px; align-items:center; }
+    nav.desktop-only a { color: var(--muted); font-weight:600; padding:6px 8px; border-radius:6px; }
+    nav.desktop-only a:hover { color: var(--text); background: rgba(255,255,255,0.02); }
+
+    .btn {
+      padding: 10px 14px; border-radius: 10px; border: 0;
+      background: linear-gradient(90deg, var(--accent-a), var(--accent-b));
+      color: #021025; font-weight:700; cursor:pointer;
+    }
+
+    .ghost {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.06);
+      padding: 8px 12px;
+      border-radius: 10px;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .skip-btn {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.06);
+      color: var(--muted);
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-weight:700;
+      cursor: pointer;
+    }
+
+    /*  nav */
+    .mobile-toggle { display:none; background:transparent; border:1px solid rgba(255,255,255,0.06); padding:8px; border-radius:8px; color:var(--text); cursor:pointer; }
+    .mobile-nav {
+      display:none; position:absolute; top:64px; right:24px;
+      background: linear-gradient(180deg, rgba(2,6,23,0.95), rgba(2,6,23,0.98));
+      border:1px solid rgba(255,255,255,0.03); padding:12px; border-radius:10px; min-width:160px;
+    }
+    .mobile-nav a { display:block; padding:8px 6px; color: var(--muted); text-decoration:none; border-radius:6px; }
+    .mobile-nav a:hover { background: rgba(255,255,255,0.02); color: var(--text); }
+
+    
+    main.hero {
+      display: grid;
+      grid-template-columns: 1fr 460px;
+      gap: 28px;
+      align-items: start;
+      padding: 36px 0;
+    }
+
+    .eyebrow {
+      display:inline-block;
+      background: rgba(124,58,237,0.08);
+      color: var(--accent-a);
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-weight:700;
+      font-size:13px;
+      margin-bottom:12px;
+    }
+
+    h1 { font-size: 40px; margin: 0 0 12px; line-height: 1.05; }
+    p.lead { color: var(--muted); margin: 0 0 20px; max-width: 56ch; }
+
+    .hero-cta { display:flex; gap:12px; align-items:center; margin: 10px 0; }
+    .stats { display:flex; gap:12px; margin-top:18px; }
+    .stat { background: var(--card); padding:8px 12px; border-radius:10px; color:var(--muted); font-weight:700; }
+
+    
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+      padding: 18px; border-radius: 12px; border:1px solid rgba(255,255,255,0.03); box-shadow: var(--shadow);
+    }
+
+    .demo { min-height: 320px; border-radius: 10px; padding: 14px; display:flex; flex-direction:column; gap:10px; background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border:1px solid rgba(255,255,255,0.02); }
+    .kicker { font-size: 12px; color: var(--muted); font-weight:700; }
+
+    .file { display:flex; align-items:center; gap:10px; padding:8px; border-radius:8px; background: rgba(255,255,255,0.02); }
+    .file .thumb { width:44px; height:44px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:700; background: linear-gradient(90deg, var(--accent-a), var(--accent-b)); color:#021025; }
+
+    .actions { display:flex; gap:8px; margin-top:auto; }
+
+   
+    .features { display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; margin-top:36px; }
+    .feature { padding:18px; border-radius:12px; background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent); border:1px solid rgba(255,255,255,0.02); }
+    .feature h3 { margin:0 0 8px; }
+
+    .how { display:flex; gap:18px; margin-top:36px; align-items:flex-start; }
+    .how-step { flex:1; padding:16px; border-radius:12px; background: rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.01); }
+
+    footer { margin-top:48px; padding:28px 0; color:var(--muted); display:flex; justify-content:space-between; align-items:center; gap:18px; }
+
+    
+    .fade-up { transform: translateY(8px); opacity: 0; animation: fu .6s forwards; }
+    .fade-up.delay-1 { animation-delay: .08s; }
+    .fade-up.delay-2 { animation-delay: .16s; }
+    @keyframes fu { to { transform: none; opacity: 1; } }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 980px) {
+      main.hero { grid-template-columns: 1fr; gap: 20px; }
+      .features { grid-template-columns: repeat(2, 1fr); }
+      nav.desktop-only { display:none; }
+      .mobile-toggle { display:inline-block; }
+    }
+    @media (max-width: 620px) {
+      .features { grid-template-columns: 1fr; }
+      .header-wrap { padding: 12px 0; }
+      .mobile-nav { right: 12px; left: 12px; top: 64px; }
+    }
+
+    .visually-hidden { position:absolute !important; height:1px; width:1px; overflow:hidden; clip:rect(1px,1px,1px,1px); white-space:nowrap; }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!--
+      Header:
+    -->
+    <header class="header-wrap" aria-label="Top navigation">
+      <div class="brand" aria-hidden="false">
+        <div class="logo" aria-hidden="true">SB</div>
+        <div style="font-weight:700">Study Buddy</div>
+      </div>
+
+      <div class="header-controls" role="group" aria-label="Header controls">
+        <!-- Desktop navigation (hidden on small screens) -->
+        <nav class="desktop-only" aria-label="Main navigation">
+          <a href="landing.html">Home</a>
+          <a href="login.html" style="margin-left:12px">Sign in</a>
+        </nav>
+
+        <!-- Skip button (goes to dashboard without auth) -->
+        <button class="skip-btn" id="skipBtn" title="Skip sign in and go to dashboard">Skip</button>
+
+        <!-- Mobile toggle (only visible on small screens) -->
+        <button class="mobile-toggle" id="mobileToggle" aria-expanded="false" aria-controls="mobileNav" aria-label="Toggle menu">☰</button>
+        <!-- Sign up button -->
+        <a class="btn" href="signup..html">Create account</a>
+      </div>
+
+      <!-- Mobile menu (appears when mobile toggle is active) -->
+      <div class="mobile-nav" id="mobileNav" role="menu" aria-hidden="true">
+        <a href="index.html" role="menuitem">Home</a>
+        <a href="login.html" role="menuitem">Sign in</a>
+      </div>
+    </header>
+
+    <!-- HERO -->
+    <main class="hero" aria-labelledby="heroHeading">
+      <section class="fade-up" style="min-width:0">
+        <span class="eyebrow">For students &amp; teachers</span>
+        <h1 id="heroHeading">Stop wasting time on repetitive study work. Automate notes, quizzes and organization.</h1>
+        <p class="lead">Students and teachers spend hours summarizing notes,now you can create quizzes and organize Your material — especially during exams. Study Buddy automates these tasks so you study faster and teach smarter.</p>
+
+        <div class="hero-cta">
+          <a class="btn" href="signup..html">Create account</a>
+          <button class="ghost" onclick="document.getElementById('demoFile').scrollIntoView({behavior:'smooth'})">
+        </div>
+
+        <div class="stats" aria-hidden="true">
+          <div class="stat">🚀 Quick summaries</div>
+          <div class="stat">🧠 Auto quizzes</div>
+        </div>
+      </section>
+
+      <!-- Demo card: small, self-contained component -->
+      <aside class="card demo fade-up delay-1" aria-labelledby="demoTitle" id="demoFile">
+        <div id="demoTitle" class="kicker">Upload a note or PDF — get a study-ready summary</div>
+
+        <div class="file" style="margin-top:10px">
+          <div class="thumb">PDF</div>
+          <div style="flex:1">
+            <div style="font-weight:700">Chapter_06_Organic_Chem.pdf</div>
+            <div style="color:var(--muted);font-size:13px;margin-top:4px">12 pages • 3.2k words</div>
+          </div>
+          <div style="font-size:13px;color:var(--muted)">Uploaded</div>
+        </div>
+
+        <div style="margin-top:10px">
+          <div style="font-weight:700">Summary (short)</div>
+          <div style="color:var(--muted);font-size:14px;margin-top:8px">This chapter explains key organic reaction mechanisms including nucleophilic substitution, elimination, and addition. Highlights include reaction conditions and common pitfalls to avoid during synthesis.</div>
+        </div>
+
+        <div class="actions" style="margin-top:14px">
+          <button class="btn" onclick="alert('Demo flow: Upload → Summarize → Save (mock)')">Summarize</button>
+          <button class="ghost" onclick="alert('Saved to your notes (demo)')">Save</button>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Features -->
+    <section class="features fade-up delay-2" aria-label="Features">
+      <div class="feature">
+        <h3>Auto-summaries</h3>
+        <p class="muted">Upload notes or PDFs and get concise summaries you can review in minutes.</p>
+      </div>
+      <div class="feature">
+        <h3>Auto-quizzes</h3>
+        <p class="muted">Turn notes into practice quizzes automatically to reinforce learning.</p>
+      </div>
+      <div class="feature">
+        <h3>Smart organization</h3>
+        <p class="muted">Group, tag, and search your materials with AI-powered suggestions.</p>
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="how fade-up" aria-label="How it works">
+      <div class="how-step">
+        <h4>1. Upload</h4>
+        <p class="muted">PDF, docx, or paste text.</p>
+      </div>
+      <div class="how-step">
+        <h4>2. Summarize</h4>
+        <p class="muted">Get short &amp; long summaries and key takeaways.</p>
+      </div>
+      <div class="how-step">
+        <h4>3. Practice</h4>
+        <p class="muted">Auto-generated quizzes and flashcards.</p>
+      </div>
+    </section>
+
+    <!-- CTA area -->
+    <section style="margin-top:36px;display:flex;gap:12px;align-items:center">
+      <a class="btn" href="dashboard.html">Start</a>
+      <button class="ghost" onclick="document.getElementById('demoFile').scrollIntoView({behavior:'smooth'})">
+    </section>
+
+    <footer>
+      <div>© Study Buddy — All rights reserved</div>
+      <div style="display:flex;gap:12px">
+       
+      </div>
+    </footer>
+  </div>
+
+  <!-- Small, readable JS for interactions -->
+  <script>
+    // Skip button -> dashboard (no async stuff, immediate redirect)
+    document.getElementById('skipBtn').addEventListener('click', () => {
+      // NOTE: Replace with an auth-guard later if you want to protect dashboard content.
+      location.href = 'dashboard.html';
+    });
+
+    // Mobile nav toggle logic (human-readable and robust)
+    (function setupMobileNav() {
+      const toggle = document.getElementById('mobileToggle');
+      const nav = document.getElementById('mobileNav');
+
+      if (!toggle || !nav) return;
+
+      function openNav() {
+        nav.style.display = 'block';
+        nav.setAttribute('aria-hidden', 'false');
+        toggle.setAttribute('aria-expanded', 'true');
+      }
+      function closeNav() {
+        nav.style.display = 'none';
+        nav.setAttribute('aria-hidden', 'true');
+        toggle.setAttribute('aria-expanded', 'false');
+      }
+
+      toggle.addEventListener('click', (e) => {
+        const isOpen = toggle.getAttribute('aria-expanded') === 'true';
+        if (isOpen) closeNav(); else openNav();
+        e.stopPropagation(); // prevent the document click handler from immediately closing it
+      });
+
+     
+      document.addEventListener('click', (e) => {
+        const path = e.composedPath ? e.composedPath() : (e.path || []);
+        const header = document.querySelector('.header-wrap');
+        if (!path.includes(header)) {
+          closeNav();
+        }
+      });
+
+      
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeNav();
+      });
+    })();
+
+    // small: ensure fade-up elements animate after load (keeps code human-friendly)
+    window.addEventListener('load', () => {
+      document.querySelectorAll('.fade-up').forEach((el) => {
+        // class already defines animation, so this simply ensures it runs
+        el.classList.add('fade-up');
+      });
+    });
+  </script>
+</body>
+</html>
